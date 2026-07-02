@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Aanbieding, Kandidaat, NieuweVacature, Partner, Rol, School, SchoolType, Vacature } from "./types";
 import {
   buildCv, conceptOf, dirNaam, fmtDatum, hrNaam, kandidaten, nvLeeg, offerData,
@@ -870,6 +870,69 @@ export function usePortal() {
 
   const nvSchoolOk = role === "directeur" ? true : !!S.nv.schoolId;
   const canSubmitVac = !!S.nv.functie.trim() && nvSchoolOk;
+
+  // ---- URL per scherm + Clarity-tag (analytics) ----
+  // Elk scherm krijgt een eigen pad zodat Microsoft Clarity het als aparte
+  // pagina ziet (heatmaps/opnames per scherm) en de terug-knop werkt.
+  const tabLabels: Record<string, string> = { dashboard: "Dashboard", vacatures: "Vacatures", plaatsingen: "Plaatsingen", scholen: "Scholen", partners: "Aanbestedingspartners", kandidaten: "Kandidatenpool" };
+  let screenPath: string;
+  let screenLabel: string;
+  if (!S.loggedIn) {
+    screenPath = "/login"; screenLabel = "Inloggen";
+  } else if (S.drawerVacId) {
+    screenPath = "/vacature/" + S.drawerVacId; screenLabel = "Vacaturedetail";
+  } else if (S.detailPlaatsingId) {
+    screenPath = "/plaatsing/" + S.detailPlaatsingId; screenLabel = "Plaatsing detail";
+  } else if (S.detailPartnerId) {
+    screenPath = "/partner/" + S.detailPartnerId; screenLabel = "Partner detail";
+  } else if (S.detailSchoolId) {
+    screenPath = "/school/" + S.detailSchoolId; screenLabel = "School detail";
+  } else {
+    screenPath = "/" + S.tab; screenLabel = tabLabels[S.tab] || S.tab;
+  }
+  if (S.loggedIn && S.cvKandId) {
+    screenPath += "?cv=" + S.cvKandId; screenLabel = "CV preview";
+  } else if (S.loggedIn && S.modalOpen) {
+    screenPath += "?modal=nieuwe-vacature"; screenLabel = "Nieuwe vacature";
+  }
+
+  const firstUrlSync = useRef(true);
+  useEffect(() => {
+    const cur = location.pathname + location.search;
+    if (cur !== screenPath) {
+      if (firstUrlSync.current) history.replaceState({}, "", screenPath);
+      else history.pushState({}, "", screenPath);
+    }
+    firstUrlSync.current = false;
+    const clarity = (window as Window & { clarity?: (...args: unknown[]) => void }).clarity;
+    clarity?.("set", "scherm", screenLabel);
+  }, [screenPath, screenLabel]);
+
+  // Terug/vooruit-knop: pad terugvertalen naar app-state.
+  const popRef = useRef<(pathname: string, search: string) => void>(() => {});
+  popRef.current = (pathname, search) => {
+    if (!S.loggedIn) {
+      if (pathname !== "/login") history.replaceState({}, "", "/login");
+      return;
+    }
+    const seg = pathname.split("/").filter(Boolean);
+    const params = new URLSearchParams(search);
+    if (seg[0] === "login") { logout(); return; }
+    const patch: Partial<PortalState> = { drawerVacId: null, detailPlaatsingId: null, detailPartnerId: null, detailSchoolId: null, cvKandId: null, modalOpen: false };
+    if (seg[0] === "vacature" && seg[1]) patch.drawerVacId = seg[1];
+    else if (seg[0] === "plaatsing" && seg[1]) patch.detailPlaatsingId = seg[1];
+    else if (seg[0] === "partner" && seg[1]) patch.detailPartnerId = seg[1];
+    else if (seg[0] === "school" && seg[1]) patch.detailSchoolId = seg[1];
+    else if (tabLabels[seg[0]]) patch.tab = seg[0];
+    if (params.get("cv")) patch.cvKandId = params.get("cv");
+    if (params.get("modal") === "nieuwe-vacature") patch.modalOpen = true;
+    set(patch);
+  };
+  useEffect(() => {
+    const onPop = () => popRef.current(location.pathname, location.search);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   return {
     // header + tabs
