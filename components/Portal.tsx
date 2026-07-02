@@ -112,7 +112,7 @@ function Login({ v }: { v: PortalVals }) {
           </>
         )}
         <button onClick={v.doLogin} className="hv-bg-orange-dark" style={{ border: "none", cursor: "pointer", background: "#DC5A2B", color: "#FFFFFF", fontFamily: "inherit", fontSize: 15, fontWeight: 800, borderRadius: 999, padding: "13px 24px", width: "100%", marginTop: 22 }}>Inloggen →</button>
-        <div style={{ fontSize: 11.5, fontWeight: 600, color: "#B7A594", marginTop: 12, textAlign: "center" }}>Demo-omgeving · geen wachtwoord nodig</div>
+        <div style={{ fontSize: 11.5, fontWeight: 600, color: "#B7A594", marginTop: 12, textAlign: "center" }}>Demo-omgeving</div>
       </div>
     </div>
   );
