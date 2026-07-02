@@ -1,0 +1,22 @@
+html, body { margin: 0; padding: 0; background: #F8F3ED; }
+*, *::before, *::after { box-sizing: border-box; }
+input::placeholder, textarea::placeholder { color: #B7A594; }
+
+@keyframes dcFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dcSlideIn { from { transform: translateX(56px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes dcPop { from { transform: scale(.96) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+@keyframes dcToast { from { transform: translate(-50%, 14px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+/* hover/focus-varianten uit het origineel (style-hover / style-focus) */
+.hv-border-orange:hover { border-color: #DC5A2B; }
+.hv-bg-orange-dark:hover { background: #C64F23; }
+.hv-bg-cream:hover { background: #FAF5EF; }
+.hv-bg-grey:hover { background: #F0EEEB; }
+.hv-bg-row:hover { background: #ECE9E6; }
+.hv-bg-tan:hover { background: #E8DACB; }
+.hv-bg-green-dark:hover { background: #67821A; }
+.hv-bg-red-light:hover { background: #F9E9E5; }
+.hv-text-dark:hover { color: #43362F; }
+.hv-underline:hover { text-decoration: underline; }
+.hv-orange-full:hover { border-color: #DC5A2B; color: #DC5A2B; }
+.fc-border-orange:focus { border-color: #DC5A2B; outline: none; }
